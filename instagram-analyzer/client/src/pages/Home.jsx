@@ -46,7 +46,7 @@ export default function Home() {
       </h2>
       <p className="text-center text-base mb-10 max-w-lg" style={{ color: 'var(--text-secondary)' }}>
         Real Instagram data. AI-powered brand detection. VVIP network analysis.
-        Just enter a username to get started.
+        Paste an Instagram profile link to get started.
       </p>
 
       {/* Search */}
@@ -86,20 +86,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Try demo */}
-      <p className="mt-10 text-sm" style={{ color: 'var(--text-muted)' }}>
-        Try:{' '}
-        {['kushakapila', 'dollysingh', 'tanmaybhat'].map((u) => (
-          <button
-            key={u}
-            onClick={() => navigate(`/dashboard/${u}`)}
-            className="underline mx-1"
-            style={{ color: 'var(--accent-orange)' }}
-          >
-            @{u}
-          </button>
-        ))}
-      </p>
     </div>
   );
 }

@@ -41,23 +41,16 @@ export default function ProfileCard({ profile }) {
           )}
 
           <div className="flex items-center gap-3 mt-4 flex-wrap">
-            {profile.website && (
-              <a
-                href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-xs underline"
-                style={{ color: 'var(--accent-orange)' }}
-              >
-                <ExternalLink size={11} />
-                {profile.website.replace(/^https?:\/\//, '')}
-              </a>
-            )}
-            {profile.metrics?.followerToFollowingRatio && (
-              <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-                {profile.metrics.followerToFollowingRatio}× ratio
-              </span>
-            )}
+            <a
+              href={`https://www.instagram.com/${profile.username}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs underline"
+              style={{ color: 'var(--accent-orange)' }}
+            >
+              <ExternalLink size={11} />
+              @{profile.username}
+            </a>
           </div>
         </div>
 

@@ -35,8 +35,9 @@ async function bootstrap() {
   const anthropicService = new AnthropicService(config);
   const analyticsEngine = new AnalyticsEngine();
 
-  // Determine demo mode
+  // In demo mode, use demoData exclusively; in live mode, pass demoData as fallback
   const demo = config.demoMode ? demoData : null;
+  const demoFallback = demoData;
 
   if (config.demoMode) {
     console.log('\n⚠  DEMO MODE ACTIVE — Using mock data for Kusha Kapila');
@@ -49,12 +50,36 @@ async function bootstrap() {
       console.warn('   Generate a new token at https://developers.facebook.com/tools/explorer/\n');
     } else {
       console.log(`✓  Instagram token valid (account: ${tokenCheck.name})`);
+
+      // Auto-resolve correct IG Business Account ID
+      try {
+        const accounts = await instagramService.resolveIGAccountId();
+        if (accounts.length > 0) {
+          const found = accounts.find((a) => a.igAccountId === instagramService.igAccountId);
+          if (!found) {
+            console.warn(`\n⚠  INSTAGRAM_BUSINESS_ACCOUNT_ID in .env (${instagramService.igAccountId}) not found via token.`);
+            console.warn('   Available connected accounts:');
+            for (const a of accounts) {
+              console.warn(`   - Page: "${a.pageName}" | IG ID: ${a.igAccountId}`);
+            }
+            instagramService.igAccountId = accounts[0].igAccountId;
+            console.log(`✓  Auto-resolved to IG Account ID: ${accounts[0].igAccountId} (${accounts[0].pageName})\n`);
+          } else {
+            console.log(`✓  IG Account ID verified: ${found.igAccountId} (${found.pageName})`);
+          }
+        } else {
+          console.warn('\n⚠  No Instagram Business Accounts found linked to your Facebook Pages.');
+          console.warn('   Make sure your Facebook Page has a connected Instagram Business/Creator account.\n');
+        }
+      } catch (err) {
+        console.warn(`\n⚠  Could not resolve IG account IDs: ${err.message}\n`);
+      }
     }
   }
 
   // ── Routes ────────────────────────────────────────────────────────────────
-  app.use('/api/profile', profileRoutes(instagramService, cacheService, analyticsEngine, demo));
-  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo));
+  app.use('/api/profile', profileRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
+  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
   app.use('/api/insights', insightsRoutes(instagramService, cacheService, demo));
   app.use('/api/network', followersRoutes(cacheService, demo));
   app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo));
