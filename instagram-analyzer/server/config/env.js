@@ -20,6 +20,7 @@ const OPTIONAL_KEYS = [
   'GRAPH_API_VERSION',
   'GRAPH_API_BASE_URL',
   'APIFY_API_TOKEN',
+  'YOUR_RAPIDAPI_KEY',
 ];
 
 function maskValue(value) {
@@ -91,6 +92,9 @@ const config = Object.freeze({
   },
   apify: {
     apiToken: process.env.APIFY_API_TOKEN || null,
+  },
+  rapidApi: {
+    key: process.env.YOUR_RAPIDAPI_KEY || null,
   },
   demoMode: DEMO_MODE,
 });

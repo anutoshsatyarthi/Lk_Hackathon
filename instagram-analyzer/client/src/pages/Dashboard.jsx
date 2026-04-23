@@ -8,6 +8,11 @@ import ErrorState from '../components/ErrorState.jsx';
 import useProfile from '../hooks/useProfile.js';
 import useMedia from '../hooks/useMedia.js';
 import useAnalysis from '../hooks/useAnalysis.js';
+import useNetwork from '../hooks/useNetwork.js';
+import ROIButton from '../components/ROIButton.jsx';
+import ROICampaignForm from '../components/ROICampaignForm.jsx';
+import ROIReport from '../components/ROIReport/ROIReport.jsx';
+import useROIPrediction from '../hooks/useROIPrediction.js';
 
 import ProfileCard from '../sections/ProfileCard.jsx';
 import KeyMetrics from '../sections/KeyMetrics.jsx';
@@ -35,6 +40,20 @@ export default function Dashboard() {
   const { data: profile, loading: profileLoading, error: profileError, refetch: refetchProfile } = useProfile(username);
   const { data: media, loading: mediaLoading, error: mediaError } = useMedia(username, 50);
   const { data: analysis, loading: analysisLoading, analyze } = useAnalysis();
+  const { data: network, loading: networkLoading } = useNetwork(username);
+  const [showROIForm, setShowROIForm] = useState(false);
+  const [showROIReport, setShowROIReport] = useState(false);
+  const { data: roiData, loading: roiLoading, predict: predictROI, reset: resetROI } = useROIPrediction();
+
+  const handleROISubmit = async (campaignConfig) => {
+    try {
+      await predictROI(username, campaignConfig, profile, media, analysis?.brands);
+      setShowROIForm(false);
+      setShowROIReport(true);
+    } catch (err) {
+      console.error('ROI prediction failed:', err);
+    }
+  };
 
   // Trigger AI analysis once we have media data
   useEffect(() => {
@@ -68,12 +87,18 @@ export default function Dashboard() {
   return (
     <Layout demoMode={demoMode}>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-5">
-        <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--text-muted)' }}>
-          <ArrowLeft size={13} /> Home
-        </button>
-        <span style={{ color: 'var(--border)' }}>/</span>
-        <span className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>@{username}</span>
+      <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate('/')} className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--text-muted)' }}>
+            <ArrowLeft size={13} /> Home
+          </button>
+          <span style={{ color: 'var(--border)' }}>/</span>
+          <span className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>@{username}</span>
+        </div>
+        <ROIButton
+          onClick={() => setShowROIForm(true)}
+          disabled={profileLoading || !profile}
+        />
       </div>
 
       {/* Profile + metrics (always visible) */}
@@ -125,10 +150,11 @@ export default function Dashboard() {
 
         {activeTab === 'network' && (
           <>
-            {analysisLoading ? <CardGridSkeleton count={6} /> : analysis ? (
-              <VVIPNetwork following={analysis.vvipFollowing} followers={analysis.vvipFollowers} />
-            ) : (
-              <LoadingState message="Running AI network analysis..." />
+            {networkLoading ? <CardGridSkeleton count={6} /> : (
+              <VVIPNetwork
+                following={network?.vvipFollowing || analysis?.vvipFollowing || []}
+                followers={network?.vvipFollowers || analysis?.vvipFollowers || []}
+              />
             )}
           </>
         )}
@@ -157,6 +183,21 @@ export default function Dashboard() {
           </>
         )}
       </div>
+
+      {showROIForm && (
+        <ROICampaignForm
+          influencer={profile}
+          onSubmit={handleROISubmit}
+          onClose={() => setShowROIForm(false)}
+          loading={roiLoading}
+        />
+      )}
+      {showROIReport && roiData && (
+        <ROIReport
+          report={roiData}
+          onClose={() => { setShowROIReport(false); resetROI(); }}
+        />
+      )}
     </Layout>
   );
 }

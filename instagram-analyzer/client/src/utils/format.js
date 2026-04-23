@@ -44,3 +44,13 @@ export const INDUSTRY_COLORS = {
   Finance: '#F2C94C',
   Other: 'var(--text-muted)',
 };
+
+export function formatINR(n) {
+  if (!n && n !== 0) return '—';
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 10_000_000) return `${sign}₹${(abs / 10_000_000).toFixed(1)} Cr`;
+  if (abs >= 100_000)    return `${sign}₹${(abs / 100_000).toFixed(2)} L`;
+  if (abs >= 1_000)      return `${sign}₹${(abs / 1_000).toFixed(1)}K`;
+  return `${sign}₹${Math.round(abs).toLocaleString('en-IN')}`;
+}

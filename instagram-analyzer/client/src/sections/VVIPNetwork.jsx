@@ -48,7 +48,7 @@ export default function VVIPNetwork({ following = [], followers = [] }) {
     return (
       <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          VVIP network data is available in demo mode. For live accounts, Instagram API does not expose follower lists for discovered accounts.
+          No notable connections found for this account. This section shows verified or high-follower accounts that appear in recent post mentions.
         </p>
       </div>
     );

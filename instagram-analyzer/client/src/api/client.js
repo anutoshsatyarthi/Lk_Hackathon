@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 30000,
+  timeout: 120000, // 2 min — Apify scraping can be slow
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -23,5 +23,20 @@ export const fetchAnalysis = (username, posts) => api.post('/analyze', { usernam
 export const fetchInsights = (username) => api.get(`/insights/${username}`).then((r) => r.data);
 export const fetchNetwork = (username) => api.get(`/network/${username}`).then((r) => r.data);
 export const checkHealth = () => api.get('/health').then((r) => r.data);
+
+const API_BASE = '/api';
+
+export async function predictROI(username, payload) {
+  const res = await fetch(`${API_BASE}/roi/predict/${username}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `ROI prediction failed: ${res.status}`);
+  }
+  return res.json();
+}
 
 export default api;

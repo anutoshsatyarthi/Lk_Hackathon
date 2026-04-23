@@ -10,6 +10,9 @@ const InstagramService = require('./services/instagram');
 const AnthropicService = require('./services/anthropic');
 const AnalyticsEngine = require('./services/analytics');
 const ApifyService = require('./services/apify');
+const ReelsEnricher = require('./services/reelsEnricher');
+const BrandDetector = require('./services/brandDetector');
+const ROIPredictor = require('./services/roiPredictor');
 const demoData = require('./services/demoData');
 const createRateLimiter = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
@@ -19,6 +22,7 @@ const mediaRoutes = require('./routes/media');
 const insightsRoutes = require('./routes/insights');
 const followersRoutes = require('./routes/followers');
 const analyzeRoutes = require('./routes/analyze');
+const roiRoutes = require('./routes/roi');
 
 async function bootstrap() {
   const app = express();
@@ -36,12 +40,21 @@ async function bootstrap() {
   const anthropicService = new AnthropicService(config);
   const analyticsEngine = new AnalyticsEngine();
   const apifyService = new ApifyService(config);
+  const reelsEnricher = new ReelsEnricher(config, apifyService);
+  const brandDetector = new BrandDetector(config, apifyService);
+  const roiPredictor = new ROIPredictor();
 
   if (apifyService.enabled) {
-    console.log('✓  Apify connected — video views, followers, and following enabled');
+    console.log('✓  Apify connected — VVIP network enabled');
   } else {
-    console.log('⚠  APIFY_API_TOKEN not set — VVIP network and video views unavailable');
+    console.log('⚠  APIFY_API_TOKEN not set — VVIP network unavailable');
   }
+  const enrichMethods = [
+    apifyService.enabled && 'Apify',
+    config.rapidApi?.key && 'RapidAPI',
+    config.anthropic?.apiKey && 'Claude',
+  ].filter(Boolean);
+  console.log(`✓  Reel view enrichment: [${enrichMethods.join(' → ')}]`);
 
   // In demo mode, use demoData exclusively; in live mode, pass demoData as fallback
   const demo = config.demoMode ? demoData : null;
@@ -87,10 +100,11 @@ async function bootstrap() {
 
   // ── Routes ────────────────────────────────────────────────────────────────
   app.use('/api/profile', profileRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
-  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback, apifyService));
+  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback, reelsEnricher));
   app.use('/api/insights', insightsRoutes(instagramService, cacheService, demo));
   app.use('/api/network', followersRoutes(cacheService, demo, apifyService));
-  app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo, apifyService));
+  app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo, apifyService, brandDetector));
+  app.use('/api/roi', roiRoutes(cacheService, roiPredictor));
 
   app.get('/api/health', (req, res) => {
     res.json({

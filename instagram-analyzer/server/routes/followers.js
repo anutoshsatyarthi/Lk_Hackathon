@@ -19,8 +19,8 @@ module.exports = function (cacheService, demoData, apifyService) {
         try {
           console.log(`[Network] Fetching followers/following for @${username} via Apify`);
           const [vvipFollowers, vvipFollowing] = await Promise.all([
-            apifyService.getNotableFollowers(username, 500),
-            apifyService.getNotableFollowing(username, 500),
+            apifyService.getNotableFollowers(username),
+            apifyService.getNotableFollowing(username),
           ]);
           const result = { vvipFollowers, vvipFollowing };
           cacheService.set(cacheKey, result, 24 * 60);
