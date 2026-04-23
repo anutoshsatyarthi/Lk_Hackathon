@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = function (anthropicService, analyticsEngine, cacheService, demoData) {
+module.exports = function (anthropicService, analyticsEngine, cacheService, demoData, apifyService) {
   router.post('/', async (req, res, next) => {
     const { username, posts = [] } = req.body;
     if (!username) return res.status(400).json({ error: 'username is required' });
@@ -19,23 +19,23 @@ module.exports = function (anthropicService, analyticsEngine, cacheService, demo
         return res.json({ ...demoData.getAnalysis(username), demoMode: true });
       }
 
-      // 1. Classify brand collaborations in post captions
-      const brandClassifications = await anthropicService.classifyBrandCollabs(posts);
+      // Run brand classification, engagement analysis, and VVIP fetch in parallel
+      const [brandClassifications, insights, apifyNetwork] = await Promise.all([
+        anthropicService.classifyBrandCollabs(posts),
+        anthropicService.analyzeEngagementPatterns(posts),
+        apifyService?.enabled
+          ? Promise.all([
+              apifyService.getNotableFollowers(username, 500).catch(() => []),
+              apifyService.getNotableFollowing(username, 500).catch(() => []),
+            ])
+          : Promise.resolve([[], []]),
+      ]);
 
-      // 2. Compute per-brand engagement metrics
       const brands = analyticsEngine.computeBrandEngagement(posts, brandClassifications);
-
-      // 3. Analyze engagement patterns
-      const insights = await anthropicService.analyzeEngagementPatterns(posts);
-
-      // 4. VVIP detection — uses AI to classify known accounts
-      // In a real scenario this would come from a following/followers list
-      // For discovered accounts, we use the demo VVIP list enriched by AI
-      const vvipFollowing = [];
-      const vvipFollowers = [];
+      const [vvipFollowers, vvipFollowing] = apifyNetwork;
 
       const result = { brands, vvipFollowing, vvipFollowers, insights };
-      cacheService.set(cacheKey, result, 24 * 60); // 24 hours
+      cacheService.set(cacheKey, result, 24 * 60);
       res.json(result);
     } catch (err) {
       next(err);

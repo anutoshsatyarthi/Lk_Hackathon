@@ -19,6 +19,7 @@ const OPTIONAL_KEYS = [
   'RATE_LIMIT_MAX_REQUESTS',
   'GRAPH_API_VERSION',
   'GRAPH_API_BASE_URL',
+  'APIFY_API_TOKEN',
 ];
 
 function maskValue(value) {
@@ -87,6 +88,9 @@ const config = Object.freeze({
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100', 10),
+  },
+  apify: {
+    apiToken: process.env.APIFY_API_TOKEN || null,
   },
   demoMode: DEMO_MODE,
 });

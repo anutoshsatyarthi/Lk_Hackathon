@@ -9,6 +9,7 @@ const CacheService = require('./services/cache');
 const InstagramService = require('./services/instagram');
 const AnthropicService = require('./services/anthropic');
 const AnalyticsEngine = require('./services/analytics');
+const ApifyService = require('./services/apify');
 const demoData = require('./services/demoData');
 const createRateLimiter = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
@@ -34,6 +35,13 @@ async function bootstrap() {
   const instagramService = new InstagramService(config);
   const anthropicService = new AnthropicService(config);
   const analyticsEngine = new AnalyticsEngine();
+  const apifyService = new ApifyService(config);
+
+  if (apifyService.enabled) {
+    console.log('✓  Apify connected — video views, followers, and following enabled');
+  } else {
+    console.log('⚠  APIFY_API_TOKEN not set — VVIP network and video views unavailable');
+  }
 
   // In demo mode, use demoData exclusively; in live mode, pass demoData as fallback
   const demo = config.demoMode ? demoData : null;
@@ -79,10 +87,10 @@ async function bootstrap() {
 
   // ── Routes ────────────────────────────────────────────────────────────────
   app.use('/api/profile', profileRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
-  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
+  app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback, apifyService));
   app.use('/api/insights', insightsRoutes(instagramService, cacheService, demo));
-  app.use('/api/network', followersRoutes(cacheService, demo));
-  app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo));
+  app.use('/api/network', followersRoutes(cacheService, demo, apifyService));
+  app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo, apifyService));
 
   app.get('/api/health', (req, res) => {
     res.json({
