@@ -32,11 +32,11 @@ class BrandDetector {
   }
 
   async detectBrandCollabs(username, posts) {
-    if (!posts?.length) return [];
+    if (!posts?.length) return { classifications: [], syntheticPosts: [] };
 
     if (!this.enabled) {
       console.warn('[BrandDetector] Apify token not configured — skipping brand detection');
-      return [];
+      return { classifications: [], syntheticPosts: [] };
     }
 
     console.log(`[BrandDetector] Fetching posts via Apify for @${username}`);
@@ -56,7 +56,7 @@ class BrandDetector {
       console.log(`[BrandDetector] Apify returned ${apifyItems.length} items`);
     } catch (err) {
       console.warn(`[BrandDetector] Apify fetch failed: ${err.message}`);
-      return [];
+      return { classifications: [], syntheticPosts: [] };
     }
 
     // Build shortCode → Meta post ID map for matching

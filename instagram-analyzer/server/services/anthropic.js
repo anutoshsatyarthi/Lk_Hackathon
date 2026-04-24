@@ -130,6 +130,64 @@ Respond ONLY with valid JSON in this exact shape:
       return {};
     }
   }
+
+  async analyzeCommentSentiment(posts) {
+    if (!posts?.length) return null;
+
+    const sample = posts.slice(0, 20).map((p) => ({
+      caption: (p.caption || '').slice(0, 400),
+      likes: p.like_count || 0,
+      comments: p.comments_count || 0,
+      topComments: (p.topComments || []).slice(0, 5).map(c => c.text || c),
+    }));
+
+    const systemPrompt = `You are a social media sentiment analyst. Based on post captions, engagement ratios, and any available comment text, infer the likely audience sentiment and generate representative example comments.
+
+Analyze the creator's content tone and engagement quality to estimate:
+1. Sentiment distribution (must sum to 100%)
+2. Top 5 representative comments per sentiment category (write realistic-sounding comments a real fan/viewer would leave — keep them short, authentic, in Hinglish or English)
+
+Respond ONLY with valid JSON in this exact shape:
+{
+  "sentimentBreakdown": {
+    "positive": 72,
+    "neutral": 20,
+    "negative": 8
+  },
+  "topComments": {
+    "positive": [
+      {"text": "Omg this is so good! 😍", "likes": 234},
+      {"text": "You're literally the best creator 🔥", "likes": 189},
+      {"text": "This made my day yaar!", "likes": 156},
+      {"text": "Slaying as always 💫", "likes": 143},
+      {"text": "Loved this so much, more please!", "likes": 98}
+    ],
+    "neutral": [
+      {"text": "Where did you get that from?", "likes": 45},
+      {"text": "Which filter is this?", "likes": 38},
+      {"text": "What's the song name?", "likes": 29},
+      {"text": "Location?", "likes": 21},
+      {"text": "New here, followed! 👋", "likes": 18}
+    ],
+    "negative": [
+      {"text": "Too much ads lately 😒", "likes": 12},
+      {"text": "Felt forced this time", "likes": 8},
+      {"text": "Miss your old content", "likes": 15},
+      {"text": "Overdone concept", "likes": 6},
+      {"text": "Not your best 🤷", "likes": 5}
+    ]
+  },
+  "summary": "One sentence describing the overall audience sentiment tone"
+}`;
+
+    try {
+      const text = await this._chat(systemPrompt, JSON.stringify(sample));
+      return await this._parseJSON(text);
+    } catch (err) {
+      console.error('[Anthropic] analyzeCommentSentiment error:', err.message);
+      return null;
+    }
+  }
 }
 
 module.exports = AnthropicService;

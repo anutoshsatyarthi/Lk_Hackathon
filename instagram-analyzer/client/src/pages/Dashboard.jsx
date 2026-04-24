@@ -23,11 +23,12 @@ import HashtagAnalysis from '../sections/HashtagAnalysis.jsx';
 import BrandCollabs from '../sections/BrandCollabs.jsx';
 import TopPosts from '../sections/TopPosts.jsx';
 import IndustryBreakdown from '../sections/IndustryBreakdown.jsx';
+import AudienceBreakdown from '../sections/AudienceBreakdown.jsx';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'engagement', label: 'Engagement' },
-  { id: 'network', label: 'Network & VVIPs' },
+  { id: 'network', label: 'Network' },
   { id: 'content', label: 'Content & Tags' },
   { id: 'brands', label: 'Brand Collabs' },
 ];
@@ -58,7 +59,7 @@ export default function Dashboard() {
   // Trigger AI analysis once we have media data
   useEffect(() => {
     if (media?.posts && !analysis && !analysisLoading) {
-      analyze(username, media.posts);
+      analyze(username, media.posts, profile);
     }
   }, [media?.posts, username]);
 
@@ -129,10 +130,10 @@ export default function Dashboard() {
         {activeTab === 'overview' && (
           <>
             {mediaLoading ? <ChartSkeleton /> : media ? (
-              <PostTypeBreakdown postTypes={media.postTypes} />
+              <PostTypeBreakdown postTypes={media.postTypes} totalMediaCount={profile?.mediaCount} />
             ) : null}
             {mediaLoading ? <ChartSkeleton height="h-72" /> : media ? (
-              <EngagementAnalytics trends={media.engagementTrends} postTypes={media.postTypes} />
+              <EngagementAnalytics trends={media.engagementTrends} postTypes={media.postTypes} totalMediaCount={profile?.mediaCount} />
             ) : null}
           </>
         )}
@@ -140,11 +141,17 @@ export default function Dashboard() {
         {activeTab === 'engagement' && (
           <>
             {mediaLoading ? <ChartSkeleton height="h-72" /> : media ? (
-              <EngagementAnalytics trends={media.engagementTrends} postTypes={media.postTypes} fullView />
+              <EngagementAnalytics trends={media.engagementTrends} postTypes={media.postTypes} fullView totalMediaCount={profile?.mediaCount} />
             ) : null}
             {mediaLoading ? <ChartSkeleton /> : media ? (
               <TopPosts posts={media.topPosts} />
             ) : null}
+            {analysisLoading ? <CardGridSkeleton count={2} /> : (
+              <AudienceBreakdown
+                audienceEstimates={analysis?.audienceEstimates}
+                sentiment={analysis?.sentiment}
+              />
+            )}
           </>
         )}
 
@@ -164,9 +171,6 @@ export default function Dashboard() {
             {mediaLoading ? <ChartSkeleton /> : media ? (
               <HashtagAnalysis hashtags={media.hashtags} />
             ) : null}
-            {mediaLoading ? <ChartSkeleton /> : media ? (
-              <TopPosts posts={media.topPosts} />
-            ) : null}
           </>
         )}
 
@@ -175,7 +179,6 @@ export default function Dashboard() {
             {analysisLoading ? <CardGridSkeleton count={4} /> : analysis ? (
               <>
                 <BrandCollabs brands={analysis.brands} />
-                <IndustryBreakdown brands={analysis.brands} />
               </>
             ) : (
               <LoadingState message="Running AI brand analysis..." />

@@ -22,20 +22,29 @@ export default function HashtagAnalysis({ hashtags = [] }) {
         <h3 className="font-display text-lg font-semibold mb-5" style={{ color: 'var(--text-primary)' }}>
           Hashtag Cloud
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-x-4 gap-y-3 items-center justify-center leading-relaxed">
           {hashtags.map((h, i) => {
-            const size = 0.7 + (h.count / max) * 0.8;
+            const ratio = h.count / max;
+            // Exponential scale so top tags are dramatically larger
+            const size = 0.68 + Math.pow(ratio, 0.55) * 2.1;
+            const opacity = 0.55 + ratio * 0.45;
             const color = PALETTE[i % PALETTE.length];
+            // Alternate vertical alignment for cloud feel
+            const nudge = [0, -4, 4, -2, 2, -6, 6][i % 7];
             return (
               <span
                 key={h.tag}
-                className="px-3 py-1.5 rounded-full font-medium cursor-default transition-opacity hover:opacity-80"
+                className="font-bold cursor-default transition-opacity hover:opacity-100 select-none"
                 style={{
                   fontSize: `${size}rem`,
-                  background: `${color}18`,
                   color,
-                  border: `1px solid ${color}33`,
+                  opacity,
+                  display: 'inline-block',
+                  transform: `translateY(${nudge}px)`,
+                  lineHeight: 1.1,
+                  letterSpacing: ratio > 0.6 ? '-0.02em' : '0',
                 }}
+                title={`${h.tag}: ${h.count} posts`}
               >
                 {h.tag}
               </span>

@@ -6,11 +6,11 @@ export default function useAnalysis() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const analyze = useCallback(async (username, posts = []) => {
+  const analyze = useCallback(async (username, posts = [], profile = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetchAnalysis(username, posts);
+      const result = await fetchAnalysis(username, posts, profile);
       setData(result);
       return result;
     } catch (err) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatINR } from '../../utils/format.js';
+import { formatINR, formatINRExact } from '../../utils/format.js';
 
 const SCENARIOS = [
   { key: 'pessimistic', label: 'Pessimistic', color: '#dc2626', icon: '📉', desc: '25th percentile' },
@@ -35,10 +35,10 @@ export default function ScenarioCards({ conversion }) {
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
               </div>
               <div className="text-right">
-                <p className="font-mono font-bold text-lg" style={{ color: roi[key] >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                  {roi[key] > 0 ? '+' : ''}{roi[key]}%
+                <p className="font-mono font-bold text-lg" style={{ color: roas[key] >= 1 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                  {roas[key]}x
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>ROI</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>ROAS</p>
               </div>
             </div>
 
@@ -47,7 +47,6 @@ export default function ScenarioCards({ conversion }) {
                 { label: 'Purchases', value: (funnel?.purchases?.[key] || 0).toLocaleString('en-IN') },
                 { label: 'Revenue', value: formatINR(revenue[key] || 0) },
                 { label: 'Net Profit', value: formatINR(profit[key] || 0), color: profit[key] >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' },
-                { label: 'ROAS', value: `${roas[key]}x` },
                 { label: 'CAC', value: formatINR(Math.min(cac[key] || 0, 99999)) },
               ].map(({ label, value, color: vc }) => (
                 <div key={label} className="flex justify-between">
@@ -67,7 +66,7 @@ export default function ScenarioCards({ conversion }) {
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
           {[
-            { label: 'Total Campaign Cost', value: formatINR(totalCost || 0) },
+            { label: 'Total Campaign Cost', value: formatINRExact(totalCost || 0) },
             { label: 'CPM (Cost per 1,000 Impressions)', value: formatINR(cpm || 0) },
             { label: 'Break-even Orders Needed', value: (breakEvenPurchases || 0).toLocaleString('en-IN') },
             { label: 'Est. Days to Break Even', value: `${conversion.daysToBreakEven || '?'} days` },

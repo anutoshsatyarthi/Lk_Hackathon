@@ -54,3 +54,10 @@ export function formatINR(n) {
   if (abs >= 1_000)      return `${sign}₹${(abs / 1_000).toFixed(1)}K`;
   return `${sign}₹${Math.round(abs).toLocaleString('en-IN')}`;
 }
+
+export function formatINRExact(n) {
+  if (!n && n !== 0) return '—';
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  return `${sign}₹${Math.round(abs).toLocaleString('en-IN')}`;
+}

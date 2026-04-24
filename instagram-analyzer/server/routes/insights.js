@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = function (instagramService, cacheService, demoData) {
+module.exports = function (instagramService, cacheService, demoData, demoFallback) {
   router.get('/:username', async (req, res, next) => {
     const { username } = req.params;
     const cacheKey = `insights:${username.toLowerCase()}`;
@@ -17,10 +17,16 @@ module.exports = function (instagramService, cacheService, demoData) {
       // Account insights only work for your own IG account, not discovered ones
       const since = Math.floor(Date.now() / 1000) - 30 * 86400;
       const until = Math.floor(Date.now() / 1000);
-      const data = await instagramService.getAccountInsights(null, since, until);
-
-      cacheService.set(cacheKey, data, 60);
-      res.json(data);
+      try {
+        const data = await instagramService.getAccountInsights(null, since, until);
+        cacheService.set(cacheKey, data, 60);
+        res.json(data);
+      } catch (apiErr) {
+        console.warn(`[Insights] Live API failed for ${username}, falling back to demo data: ${apiErr.message}`);
+        const fallback = demoFallback || demoData;
+        if (fallback) return res.json({ ...fallback.getInsights(username), demoMode: true });
+        next(apiErr);
+      }
     } catch (err) {
       next(err);
     }

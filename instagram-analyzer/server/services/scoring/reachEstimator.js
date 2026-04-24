@@ -12,14 +12,19 @@ class ReachEstimator {
     const avgLikes = posts.length ? posts.reduce((s,p) => s + (p.like_count||0), 0) / posts.length : 0;
 
     let baseReach;
+    const naturalReach = followers * this._reachRate(followers);
     if (fmt === 'reel' || fmt === 'story') {
-      baseReach = avgReelViews > 0 ? avgReelViews : followers * this._reachRate(followers);
+      // Use reel views as a quality signal but cap at 2x natural reach.
+      // Organic viral reels can hit millions of views, but sponsored content
+      // does not replicate that — Instagram limits paid/branded reach.
+      const sponsoredCap = naturalReach * 2.0;
+      baseReach = avgReelViews > 0 ? Math.min(avgReelViews, sponsoredCap) : naturalReach;
     } else if (fmt === 'carousel') {
       baseReach = avgLikes * 4.5;
     } else {
       baseReach = avgLikes * 3.5;
     }
-    if (baseReach < followers * 0.1) baseReach = followers * 0.15; // floor at 15% of followers
+    if (baseReach < followers * 0.08) baseReach = followers * 0.10; // floor at 10% of followers
 
     // Step 2: Sponsorship decay
     const decayMap = { deep: 0.85, moderate: 0.70, light: 0.55, story: 0.40 };

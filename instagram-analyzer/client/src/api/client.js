@@ -19,7 +19,7 @@ api.interceptors.response.use(
 
 export const fetchProfile = (username) => api.get(`/profile/${username}`).then((r) => r.data);
 export const fetchMedia = (username, limit = 50) => api.get(`/media/${username}?limit=${limit}`).then((r) => r.data);
-export const fetchAnalysis = (username, posts) => api.post('/analyze', { username, posts }).then((r) => r.data);
+export const fetchAnalysis = (username, posts, profile = {}) => api.post('/analyze', { username, posts, profile }).then((r) => r.data);
 export const fetchInsights = (username) => api.get(`/insights/${username}`).then((r) => r.data);
 export const fetchNetwork = (username) => api.get(`/network/${username}`).then((r) => r.data);
 export const checkHealth = () => api.get('/health').then((r) => r.data);

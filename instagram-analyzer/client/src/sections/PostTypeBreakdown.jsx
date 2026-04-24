@@ -8,8 +8,8 @@ const TYPE_COLORS = {
   COLLAB: 'var(--accent-green)',
 };
 
-function DonutChart({ data, size = 160 }) {
-  const total = data.reduce((s, d) => s + d.count, 0);
+function DonutChart({ data, centerTotal, size = 160 }) {
+  const sampleTotal = data.reduce((s, d) => s + d.count, 0);
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.38;
@@ -18,7 +18,7 @@ function DonutChart({ data, size = 160 }) {
 
   let cumulative = 0;
   const segments = data.map((d) => {
-    const pct = total > 0 ? d.count / total : 0;
+    const pct = sampleTotal > 0 ? d.count / sampleTotal : 0;
     const startAngle = cumulative * 2 * Math.PI - Math.PI / 2;
     cumulative += pct;
     const endAngle = cumulative * 2 * Math.PI - Math.PI / 2;
@@ -32,6 +32,8 @@ function DonutChart({ data, size = 160 }) {
     return { ...d, path: `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`, pct };
   });
 
+  const displayTotal = centerTotal || sampleTotal;
+
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       {segments.map((seg, i) => (
@@ -44,9 +46,8 @@ function DonutChart({ data, size = 160 }) {
           strokeLinecap="butt"
         />
       ))}
-      {/* Center label */}
       <text x={cx} y={cy - 6} textAnchor="middle" fill="var(--text-primary)" fontSize={size * 0.14} fontFamily="JetBrains Mono, monospace" fontWeight="500">
-        {formatNumber(total)}
+        {formatNumber(displayTotal)}
       </text>
       <text x={cx} y={cy + size * 0.1} textAnchor="middle" fill="var(--text-muted)" fontSize={size * 0.075}>
         total posts
@@ -55,16 +56,32 @@ function DonutChart({ data, size = 160 }) {
   );
 }
 
-export default function PostTypeBreakdown({ postTypes = [] }) {
+export default function PostTypeBreakdown({ postTypes = [], totalMediaCount }) {
+  const sampleTotal = postTypes.reduce((s, d) => s + d.count, 0);
+  const total = totalMediaCount || sampleTotal;
+
+  // Scale each type's count from sample percentages to the real total
+  const scaled = postTypes.map((t) => ({
+    ...t,
+    scaledCount: Math.round((t.percentage / 100) * total),
+  }));
+
   return (
     <div className="rounded-2xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-      <h3 className="font-display text-lg font-semibold mb-5" style={{ color: 'var(--text-primary)' }}>
-        Post Type Breakdown
-      </h3>
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-display text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+          Post Type Breakdown
+        </h3>
+        {totalMediaCount && sampleTotal < totalMediaCount && (
+          <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            based on last {sampleTotal} posts
+          </span>
+        )}
+      </div>
       <div className="flex flex-col sm:flex-row items-center gap-8">
-        <DonutChart data={postTypes} size={160} />
+        <DonutChart data={postTypes} centerTotal={total} size={160} />
         <div className="flex flex-col gap-3 flex-1 w-full">
-          {postTypes.map((t) => (
+          {scaled.map((t) => (
             <div key={t.type}>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -72,7 +89,7 @@ export default function PostTypeBreakdown({ postTypes = [] }) {
                   <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{t.label}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-sm" style={{ color: 'var(--text-primary)' }}>{formatNumber(t.count)}</span>
+                  <span className="font-mono text-sm" style={{ color: 'var(--text-primary)' }}>{formatNumber(t.scaledCount)}</span>
                   <span className="font-mono text-xs w-12 text-right" style={{ color: 'var(--text-muted)' }}>{t.percentage}%</span>
                 </div>
               </div>

@@ -47,8 +47,8 @@ function PostCard({ post, rank }) {
             { icon: Heart, value: post.likes, color: 'var(--accent-orange)' },
             { icon: MessageCircle, value: post.comments, color: 'var(--accent-blue)' },
             { icon: Eye, value: post.views, color: 'var(--accent-purple)' },
-            { icon: Bookmark, value: post.saves, color: 'var(--accent-green)' },
-          ].map(({ icon: Icon, value, color }) => (
+            post.saves > 0 && { icon: Bookmark, value: post.saves, color: 'var(--accent-green)' },
+          ].filter(Boolean).map(({ icon: Icon, value, color }) => (
             <div key={color} className="flex items-center gap-1">
               <Icon size={11} style={{ color }} />
               <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>{formatNumber(value)}</span>

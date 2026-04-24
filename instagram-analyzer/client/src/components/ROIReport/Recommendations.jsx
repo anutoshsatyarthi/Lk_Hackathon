@@ -6,7 +6,7 @@ export default function Recommendations({ recommendations = [] }) {
     <div className="rounded-2xl p-5 space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <div>
         <h3 className="font-display font-semibold text-base" style={{ color: 'var(--text-primary)' }}>Actionable Recommendations</h3>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Steps to maximize campaign ROI</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Steps to maximize campaign ROAS</p>
       </div>
       <div className="space-y-2">
         {recommendations.map((rec, i) => (
@@ -16,9 +16,6 @@ export default function Recommendations({ recommendations = [] }) {
               <div className="flex-1">
                 <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{rec.action}</p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{rec.reason}</p>
-                {rec.impact && (
-                  <p className="text-xs mt-1 font-medium" style={{ color: 'var(--accent-green)' }}>Impact: {rec.impact}</p>
-                )}
               </div>
             </div>
           </div>

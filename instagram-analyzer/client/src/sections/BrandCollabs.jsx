@@ -25,7 +25,7 @@ function BrandCard({ brand }) {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center text-lg flex-shrink-0" style={{ background: `${indColor}20` }}>
-              {{ Beauty: '💄', Fashion: '👗', Tech: '📱', Food: '🍕', Entertainment: '🎬', Travel: '✈️', Fitness: '💪', Finance: '💰' }[brand.industry] || '🏢'}
+              {{ Beauty: '💄', Fashion: '👗', Tech: '📱', Food: '🍕', Entertainment: '🎬', Travel: '✈️', Fitness: '💪', Finance: '💰', Eyewear: '👓', Auto: '🚗', Telecom: '📡', Ecommerce: '🛒', Alcohol: '🥂', Other: '🤝' }[brand.industry] || '🤝'}
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>{brand.brand}</p>

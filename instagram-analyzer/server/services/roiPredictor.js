@@ -28,7 +28,7 @@ class ROIPredictor {
       profitMargin: campaignConfig.profitMargin || 0.40,
       hasDiscountCode: campaignConfig.hasDiscountCode || false,
       discountPercent: campaignConfig.discountPercent || 15,
-      hasVirtualTryOn: campaignConfig.hasVirtualTryOn || true,
+      hasVirtualTryOn: campaignConfig.hasVirtualTryOn || false,
       integrationLevel: campaignConfig.integrationLevel || 'moderate',
       durationDays: { '1week': 7, '2weeks': 14, '1month': 30 }[campaignConfig.duration] || 14,
     };
@@ -110,11 +110,12 @@ class ROIPredictor {
 
   _recommend(score, conversion, dealBreakers) {
     if (dealBreakers.length > 0) return { verdict: 'NO-GO', reason: dealBreakers[0] };
-    const roi = conversion.roi.expected;
-    if (score > 0.78 && roi > 80)  return { verdict: 'STRONG GO', reason: `Composite score ${(score*100).toFixed(0)}/100 with expected ${roi}% ROI — strong alignment across all dimensions` };
-    if (score > 0.62 && roi > 20)  return { verdict: 'GO', reason: `Good influencer-brand fit with positive expected ROI of ${roi}%` };
-    if (score > 0.48 && roi > -20) return { verdict: 'CONDITIONAL', reason: `Moderate fit — negotiate performance-based pricing to de-risk the ${roi < 0 ? 'negative' : 'low'} ROI scenario` };
-    return { verdict: 'NO-GO', reason: `Low composite score (${(score*100).toFixed(0)}/100) and unfavorable financial projections` };
+    const roas = conversion.roas.expected;
+    const roasStr = `${roas}x ROAS`;
+    if (score > 0.78 && roas > 1.2)  return { verdict: 'STRONG GO', reason: `Strong creator-brand alignment (${(score*100).toFixed(0)}/100) with projected ${roasStr} — exceptional engagement and audience fit` };
+    if (score > 0.62 && roas > 0.6)  return { verdict: 'GO', reason: `Good influencer-brand fit with projected ${roasStr} and strong audience engagement alignment` };
+    if (score > 0.48 && roas > 0.3)  return { verdict: 'CONDITIONAL', reason: `Moderate fit — negotiate performance-based terms to improve the projected ${roasStr}` };
+    return { verdict: 'NO-GO', reason: `Low composite score (${(score*100).toFixed(0)}/100) — projected ${roasStr} unlikely to justify campaign investment` };
   }
 
   _assessRisks({ engScore, audScore, affcScore, affnScore, contScore }, conversion, config) {
@@ -123,13 +124,13 @@ class ROIPredictor {
       risks.push({ severity: 'CRITICAL', factor: 'Competitor conflict', detail: affnScore.dealBreakers[0], mitigation: 'Include 6-month eyewear category exclusivity clause in contract' });
     }
     if (engScore.breakdown.consistency?.score < 0.45) {
-      risks.push({ severity: 'HIGH', factor: 'Inconsistent engagement', detail: `Engagement varies widely — actual ROI could be ${Math.abs(conversion.roi.pessimistic - conversion.roi.expected)}% lower than expected`, mitigation: 'Negotiate 50% upfront + 50% performance bonus to de-risk' });
+      risks.push({ severity: 'HIGH', factor: 'Inconsistent engagement', detail: `Engagement varies widely — pessimistic scenario shows ${conversion.roas.pessimistic}x ROAS vs ${conversion.roas.expected}x expected. Content performance is unpredictable.`, mitigation: 'Negotiate 50% upfront + 50% performance bonus to de-risk' });
     }
     if (audScore.breakdown.authenticity?.score < 0.65) {
       risks.push({ severity: 'HIGH', factor: 'Audience quality concerns', detail: `Authenticity score ${Math.round(audScore.breakdown.authenticity.score*100)}% — engagement may not translate to real purchases`, mitigation: 'Request Instagram Insights screenshot from creator before contract' });
     }
-    if (conversion.roi.pessimistic < -40) {
-      risks.push({ severity: 'MEDIUM', factor: 'Downside exposure', detail: `Worst-case ROI is ${conversion.roi.pessimistic}% — significant loss if content underperforms`, mitigation: `Reduce upfront fee to ₹${Math.round(config.fee*0.6).toLocaleString('en-IN')} + performance bonus on tracked orders` });
+    if (conversion.roas.pessimistic < 0.4) {
+      risks.push({ severity: 'MEDIUM', factor: 'Downside exposure', detail: `Pessimistic scenario shows ${conversion.roas.pessimistic}x ROAS — campaign cost may not be recovered if content underperforms. Calculated as revenue ÷ total campaign spend.`, mitigation: `Reduce upfront fee to ₹${Math.round(config.fee*0.6).toLocaleString('en-IN')} + performance bonus on tracked orders` });
     }
     if (affcScore.breakdown.audienceTier?.score < 0.45) {
       risks.push({ severity: 'MEDIUM', factor: 'Affordability risk', detail: '₹3,500 AOV may be a stretch purchase for this audience segment', mitigation: 'Lead with ₹1,500-2,000 entry-level products or aggressive discount code to lower barrier' });
@@ -144,24 +145,24 @@ class ROIPredictor {
     const recs = [];
     const fmt = config.contentFormat;
     if (fmt !== 'reel' && contScore.breakdown.formatEffectiveness?.score < 0.7) {
-      recs.push({ action: 'Switch to Reel format', reason: 'This creator performs best with video content', impact: '+25-40% estimated reach' });
+      recs.push({ action: 'Switch to Reel format', reason: 'This creator performs best with video content — reels get wider algorithmic distribution than static posts.' });
     }
     if (!config.hasDiscountCode) {
-      recs.push({ action: 'Include influencer-exclusive discount code (15-20%)', reason: 'Discount codes increase cart rate by ~30% and enable attribution tracking', impact: `+${Math.round(conversion.funnel.purchases.expected * 0.3)} estimated additional purchases` });
+      recs.push({ action: 'Include influencer-exclusive discount code (15-20%)', reason: 'Discount codes increase add-to-cart rate by ~30% and enable direct attribution tracking from post to purchase.' });
     }
     if (!config.hasVirtualTryOn) {
-      recs.push({ action: 'Include Virtual Try-On link in caption', reason: "Lenskart's VTO reduces purchase hesitation for glasses", impact: '+15-20% conversion uplift on eyewear/sunglasses' });
+      recs.push({ action: 'Include Virtual Try-On link in caption', reason: "Lenskart's VTO removes purchase hesitation for eyewear. Reduces returns and increases confidence at checkout." });
     }
     if (config.numPosts > 3) {
-      recs.push({ action: `Consider reducing from ${config.numPosts} to 3 posts`, reason: 'Reach has diminishing returns after post 3 — reallocate budget to higher-ROI creators', impact: 'Same reach for lower cost, higher efficiency' });
+      recs.push({ action: `Consider reducing from ${config.numPosts} to 3 posts`, reason: 'Reach has diminishing returns after post 3 due to audience overlap — reallocate remaining budget to a second higher-ROAS creator.' });
     }
     if (affnScore.breakdown.contentFit?.value === 'Comedy' || affnScore.breakdown.contentFit?.value === 'Lifestyle') {
-      recs.push({ action: 'Request integrated sketch/skit format over product showcase', reason: 'Audience responds to authentic content integration, not product reviews', impact: '+35% engagement on sponsored content vs standard product review' });
+      recs.push({ action: 'Request integrated sketch/skit format over product showcase', reason: "This creator's audience responds to authentic content — a natural integration outperforms a standard product review in engagement and clicks." });
     }
     if (config.integrationLevel === 'light') {
-      recs.push({ action: "Upgrade to 'Deep' integration level", reason: 'Light integrations get 30% less reach due to less organic sharing', impact: '+20% estimated reach with same post count' });
+      recs.push({ action: "Upgrade to 'Deep' integration level", reason: 'Light integrations typically underperform — audiences skip or ignore cameo-style mentions. Full integration drives 20-30% more organic sharing.' });
     }
-    recs.push({ action: 'Add UTM tracking to Lenskart campaign URL', reason: 'Attribution data improves future ROI predictions for this creator', impact: 'Full funnel visibility from post to purchase' });
+    recs.push({ action: 'Add UTM tracking to Lenskart campaign URL', reason: 'UTM parameters enable full-funnel visibility — from post view to cart to purchase. Essential for accurate ROAS measurement on future campaigns.' });
     return recs.slice(0, 6);
   }
 

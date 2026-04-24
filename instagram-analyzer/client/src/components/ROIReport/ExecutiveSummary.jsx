@@ -1,5 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatINR } from '../../utils/format.js';
+
+function InfoTip({ text }) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative inline-flex items-center ml-1" style={{ verticalAlign: 'middle' }}>
+      <button
+        type="button"
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        className="w-3.5 h-3.5 rounded-full inline-flex items-center justify-center flex-shrink-0 font-bold"
+        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border)', fontSize: '0.55rem' }}
+      >
+        i
+      </button>
+      {visible && (
+        <div className="absolute z-50 rounded-xl p-2.5 text-xs shadow-xl"
+          style={{ bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)', background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text-secondary)', width: '220px', lineHeight: '1.4', pointerEvents: 'none' }}>
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const VERDICT_CONFIG = {
   'STRONG GO': { bg: '#16a34a', label: 'STRONG GO', icon: '🚀' },
@@ -55,15 +78,16 @@ export default function ExecutiveSummary({ summary }) {
 
           <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3 min-w-0">
             {[
-              { label: 'Expected ROI', value: `${summary.expectedROI > 0 ? '+' : ''}${summary.expectedROI}%`, color: summary.expectedROI > 0 ? 'var(--accent-green)' : 'var(--accent-red)' },
               { label: 'Expected ROAS', value: `${summary.expectedROAS}x`, color: 'var(--accent-blue)' },
               { label: 'Est. Purchases', value: (summary.expectedPurchases || 0).toLocaleString('en-IN'), color: 'var(--accent-orange)' },
               { label: 'Est. Revenue', value: formatINR(summary.expectedRevenue || 0), color: 'var(--accent-green)' },
-              { label: 'Composite Score', value: `${Math.round(summary.compositeScore * 100)}/100`, color: 'var(--text-primary)' },
+              { label: 'Composite Score', value: `${Math.round(summary.compositeScore * 100)}/100`, color: 'var(--text-primary)', tip: 'Weighted average of 5 dimensions: Engagement 25% + Affinity 25% + Audience 20% + Content 15% + Affluence 15%. Graded A+→D. >75 = strong GO, 55–75 = conditional, <55 = NO-GO.' },
               { label: 'Grade', value: summary.compositeGrade, color: summary.compositeGrade?.startsWith('A') ? 'var(--accent-green)' : 'var(--accent-orange)' },
-            ].map(({ label, value, color }) => (
+            ].map(({ label, value, color, tip }) => (
               <div key={label} className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)' }}>
-                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
+                <p className="text-xs mb-1 flex items-center" style={{ color: 'var(--text-muted)' }}>
+                  {label}{tip && <InfoTip text={tip} />}
+                </p>
                 <p className="font-mono font-bold text-base" style={{ color }}>{value}</p>
               </div>
             ))}

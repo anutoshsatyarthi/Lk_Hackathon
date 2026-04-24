@@ -9,11 +9,11 @@ import RiskFactors from './RiskFactors.jsx';
 import Recommendations from './Recommendations.jsx';
 
 const SCORE_META = [
-  { key: 'engagement', name: 'Engagement',  weight: 0.25 },
-  { key: 'audience',   name: 'Audience',    weight: 0.20 },
-  { key: 'affluence',  name: 'Affluence',   weight: 0.15 },
-  { key: 'affinity',   name: 'Affinity',    weight: 0.25 },
-  { key: 'content',    name: 'Content',     weight: 0.15 },
+  { key: 'engagement', name: 'Engagement', weight: 0.25, tooltip: 'Measures engagement rate, posting consistency, reel algorithmic reach, saves/shares ratio, and comment quality. Graded A–D on a weighted average. A = >6% ER, consistent posts, strong reel views.' },
+  { key: 'audience',   name: 'Audience',   weight: 0.20, tooltip: 'Measures how closely the audience matches Lenskart\'s target customer: India % (Lenskart\'s primary market), age 18–45, gender, and interest signals in fashion/lifestyle.' },
+  { key: 'affluence',  name: 'Affluence',  weight: 0.15, tooltip: 'Estimates audience spending power using brand mentions, Tier-1 city concentration, and purchase-behavior signals in posts. Predicts whether the audience is likely to buy ₹2,500–7,000 eyewear.' },
+  { key: 'affinity',   name: 'Affinity',   weight: 0.25, tooltip: 'Brand-creator fit score. Measures content niche compatibility with eyewear, absence of competitor conflicts, and how naturally Lenskart can be integrated into this creator\'s content style.' },
+  { key: 'content',    name: 'Content',    weight: 0.15, tooltip: 'Scores caption CTA quality, hashtag discovery strategy, posting frequency regularity, and format-audience fit. Higher = content structured to drive clicks and conversions.' },
 ];
 
 export default function ROIReport({ report, onClose }) {
@@ -29,7 +29,7 @@ export default function ROIReport({ report, onClose }) {
           {/* Sticky header */}
           <div className="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-6 py-3" style={{ background: 'var(--bg-primary)', borderBottom: '1px solid var(--border)' }}>
             <div>
-              <h2 className="font-display font-bold text-base" style={{ color: 'var(--text-primary)' }}>ROI Prediction Report</h2>
+              <h2 className="font-display font-bold text-base" style={{ color: 'var(--text-primary)' }}>ROAS Prediction Report</h2>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>@{report.influencer?.username} × Lenskart · {new Date(report.generatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
             </div>
             <div className="flex items-center gap-2">
@@ -48,7 +48,7 @@ export default function ROIReport({ report, onClose }) {
             <div>
               <h3 className="font-display font-semibold text-base mb-3" style={{ color: 'var(--text-primary)' }}>Score Breakdown</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {SCORE_META.map(({ key, name, weight }) => {
+                {SCORE_META.map(({ key, name, weight, tooltip }) => {
                   const s = scores?.[key];
                   if (!s) return null;
                   return (
@@ -61,6 +61,7 @@ export default function ROIReport({ report, onClose }) {
                       breakdown={s.breakdown}
                       insights={s.insights}
                       weight={weight}
+                      tooltip={tooltip}
                     />
                   );
                 })}

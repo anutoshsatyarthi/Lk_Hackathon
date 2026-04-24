@@ -23,6 +23,7 @@ const insightsRoutes = require('./routes/insights');
 const followersRoutes = require('./routes/followers');
 const analyzeRoutes = require('./routes/analyze');
 const roiRoutes = require('./routes/roi');
+const proxyRoutes = require('./routes/proxy');
 
 async function bootstrap() {
   const app = express();
@@ -101,10 +102,11 @@ async function bootstrap() {
   // ── Routes ────────────────────────────────────────────────────────────────
   app.use('/api/profile', profileRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback));
   app.use('/api/media', mediaRoutes(instagramService, cacheService, analyticsEngine, demo, demoFallback, reelsEnricher));
-  app.use('/api/insights', insightsRoutes(instagramService, cacheService, demo));
+  app.use('/api/insights', insightsRoutes(instagramService, cacheService, demo, demoFallback));
   app.use('/api/network', followersRoutes(cacheService, demo, apifyService));
   app.use('/api/analyze', analyzeRoutes(anthropicService, analyticsEngine, cacheService, demo, apifyService, brandDetector));
   app.use('/api/roi', roiRoutes(cacheService, roiPredictor));
+  app.use('/api/proxy', proxyRoutes);
 
   app.get('/api/health', (req, res) => {
     res.json({

@@ -153,7 +153,7 @@ export default function ROICampaignForm({ influencer, onSubmit, onClose, loading
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4" style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 className="font-display font-semibold text-base" style={{ color: 'var(--text-primary)' }}>Predict ROI for Lenskart</h2>
+            <h2 className="font-display font-semibold text-base" style={{ color: 'var(--text-primary)' }}>Predict ROAS for Lenskart</h2>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>@{influencer?.username || influencer}</p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg" style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>
@@ -198,9 +198,6 @@ export default function ROICampaignForm({ influencer, onSubmit, onClose, loading
               <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(237,137,54,0.12)', color: 'var(--accent-orange)' }}>
                 ATV ₹{selectedBrand.aov.toLocaleString('en-IN')}
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: 'var(--accent-green)' }}>
-                {selectedBrand.margin}% margin
-              </span>
             </div>
           </Field>
 
@@ -213,7 +210,7 @@ export default function ROICampaignForm({ influencer, onSubmit, onClose, loading
               How will Lenskart appear in the content?
             </label>
             <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-              This is the single biggest factor in how many people actually click and buy. Deeper = better ROI.
+              This is the single biggest factor in how many people actually click and buy. Deeper = better ROAS.
             </p>
             <div className="space-y-2">
               {INTEGRATIONS.map(opt => {
@@ -262,7 +259,7 @@ export default function ROICampaignForm({ influencer, onSubmit, onClose, loading
               className="w-full py-3 rounded-xl font-semibold text-sm transition-all"
               style={{ background: loading ? 'var(--bg-elevated)' : 'var(--accent-orange)', color: loading ? 'var(--text-muted)' : '#fff', cursor: loading ? 'not-allowed' : 'pointer' }}
             >
-              {loading ? 'Generating Report...' : 'Generate ROI Report'}
+              {loading ? 'Generating Report...' : 'Generate ROAS Report'}
             </button>
           </div>
         </form>
