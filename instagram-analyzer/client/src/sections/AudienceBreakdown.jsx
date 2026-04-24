@@ -31,13 +31,13 @@ function SentimentDonut({ positive = 72, neutral = 20, negative = 8 }) {
         {/* Positive (green) */}
         <circle cx={size/2} cy={size/2} r={r} fill="none" strokeWidth="10" stroke="#16a34a"
           strokeDasharray={`${posLen} ${circ}`} strokeLinecap="butt" />
-        {/* Neutral (orange) */}
-        <circle cx={size/2} cy={size/2} r={r} fill="none" strokeWidth="10" stroke="#d97706"
+        {/* Neutral (gray) */}
+        <circle cx={size/2} cy={size/2} r={r} fill="none" strokeWidth="10" stroke="#6b7280"
           strokeDasharray={`${neuLen} ${circ - posLen}`}
           strokeDashoffset={-posLen}
           strokeLinecap="butt" />
-        {/* Negative (red) */}
-        <circle cx={size/2} cy={size/2} r={r} fill="none" strokeWidth="10" stroke="#dc2626"
+        {/* Negative (amber) */}
+        <circle cx={size/2} cy={size/2} r={r} fill="none" strokeWidth="10" stroke="#f59e0b"
           strokeDasharray={`${negLen} ${circ}`}
           strokeDashoffset={-(posLen + neuLen)}
           strokeLinecap="butt" />
@@ -76,8 +76,8 @@ export default function AudienceBreakdown({ audienceEstimates, sentiment }) {
 
   const sentCategories = [
     { key: 'positive', label: 'Positive', color: '#16a34a', icon: '😍' },
-    { key: 'neutral',  label: 'Neutral',  color: '#d97706', icon: '💬' },
-    { key: 'negative', label: 'Negative', color: '#dc2626', icon: '😒' },
+    { key: 'neutral',  label: 'Neutral',  color: '#6b7280', icon: '💬' },
+    { key: 'negative', label: 'Negative', color: '#f59e0b', icon: '😒' },
   ];
 
   return (
@@ -119,12 +119,6 @@ export default function AudienceBreakdown({ audienceEstimates, sentiment }) {
                   </div>
                 </div>
               </div>
-            )}
-            {breakdown.interestAlign && (
-              <DemographicBar label="Interest Match" value={breakdown.interestAlign.value} score={breakdown.interestAlign.score} color="var(--accent-orange)" />
-            )}
-            {breakdown.authenticity && (
-              <DemographicBar label="Authenticity" value={breakdown.authenticity.value} score={breakdown.authenticity.score} color="var(--accent-green)" />
             )}
           </div>
         </div>

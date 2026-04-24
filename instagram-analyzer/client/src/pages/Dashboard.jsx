@@ -143,15 +143,15 @@ export default function Dashboard() {
             {mediaLoading ? <ChartSkeleton height="h-72" /> : media ? (
               <EngagementAnalytics trends={media.engagementTrends} postTypes={media.postTypes} fullView totalMediaCount={profile?.mediaCount} />
             ) : null}
-            {mediaLoading ? <ChartSkeleton /> : media ? (
-              <TopPosts posts={media.topPosts} />
-            ) : null}
             {analysisLoading ? <CardGridSkeleton count={2} /> : (
               <AudienceBreakdown
                 audienceEstimates={analysis?.audienceEstimates}
                 sentiment={analysis?.sentiment}
               />
             )}
+            {mediaLoading ? <ChartSkeleton /> : media ? (
+              <TopPosts posts={media.topPosts} />
+            ) : null}
           </>
         )}
 

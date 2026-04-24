@@ -147,6 +147,14 @@ Analyze the creator's content tone and engagement quality to estimate:
 1. Sentiment distribution (must sum to 100%)
 2. Top 5 representative comments per sentiment category (write realistic-sounding comments a real fan/viewer would leave — keep them short, authentic, in Hinglish or English)
 
+STRICT CONTENT GUARDRAILS — all generated comments MUST:
+- Be about the CONTENT, not the creator's physical appearance, face, skin color, or body
+- Contain NO personal compliments or critiques about looks, complexion, or features
+- Contain NO vulgar, offensive, or sexually suggestive language
+- Contain NO religious references, deities, or faith-based expressions
+- Contain NO racial, casteist, or ethnicity-based references
+- Be safe-for-work and brand-appropriate
+
 Respond ONLY with valid JSON in this exact shape:
 {
   "sentimentBreakdown": {
@@ -156,25 +164,25 @@ Respond ONLY with valid JSON in this exact shape:
   },
   "topComments": {
     "positive": [
-      {"text": "Omg this is so good! 😍", "likes": 234},
-      {"text": "You're literally the best creator 🔥", "likes": 189},
-      {"text": "This made my day yaar!", "likes": 156},
-      {"text": "Slaying as always 💫", "likes": 143},
-      {"text": "Loved this so much, more please!", "likes": 98}
+      {"text": "This content is everything, more please!", "likes": 234},
+      {"text": "The vibe of this reel is unmatched yaar 🔥", "likes": 189},
+      {"text": "This made my whole day, loved every second", "likes": 156},
+      {"text": "The styling here is absolutely on point 💫", "likes": 143},
+      {"text": "Keep these coming, such good content!", "likes": 98}
     ],
     "neutral": [
-      {"text": "Where did you get that from?", "likes": 45},
-      {"text": "Which filter is this?", "likes": 38},
-      {"text": "What's the song name?", "likes": 29},
+      {"text": "Where did you get that outfit from?", "likes": 45},
+      {"text": "Which song is this?", "likes": 38},
+      {"text": "What editing app do you use?", "likes": 29},
       {"text": "Location?", "likes": 21},
       {"text": "New here, followed! 👋", "likes": 18}
     ],
     "negative": [
-      {"text": "Too much ads lately 😒", "likes": 12},
-      {"text": "Felt forced this time", "likes": 8},
-      {"text": "Miss your old content", "likes": 15},
-      {"text": "Overdone concept", "likes": 6},
-      {"text": "Not your best 🤷", "likes": 5}
+      {"text": "Too many brand posts lately 😒", "likes": 12},
+      {"text": "This collab felt a bit forced", "likes": 8},
+      {"text": "Miss your old style of content", "likes": 15},
+      {"text": "Concept's been overdone now", "likes": 6},
+      {"text": "Not your strongest work honestly", "likes": 5}
     ]
   },
   "summary": "One sentence describing the overall audience sentiment tone"
